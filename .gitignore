@@ -9,3 +9,6 @@ compile_commands.json
 CTestTestfile.cmake
 /build
 *.blend1
+*.vcxproj
+*.filters
+*.sln
