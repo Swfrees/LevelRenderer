@@ -5,7 +5,7 @@
 #ifdef _WIN32 // must use MT platform DLL libraries on windows
 	#pragma comment(lib, "shaderc_combined.lib") 
 #endif
-
+#include "Parser.h"
 #define MAX_SUBMESH_PER_DRAW 1024
 struct SHADER_MODEL_DATA
 {
@@ -257,6 +257,7 @@ public:
 		win.GetClientHeight(height);
 		vlk.GetAspectRatio(aspect);
 		// TODO: Part 2a
+		ParseLevel("..\\GameLevel.txt");
 		//mathOperator.RotateYGlobalF(worldMatrix, 3.214f, worldMatrix);
 		Eye.x = 0.75f;
 		Eye.y = 0.25f;

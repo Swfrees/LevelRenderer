@@ -12,3 +12,15 @@ CTestTestfile.cmake
 *.vcxproj
 *.filters
 *.sln
+LevelCode/Vulkan/build/.vs/Assignment_2_Vulkan/v16/.suo
+*.db
+*.ipch
+*.user
+*.lastbuildstate
+*.tlog
+*.recipe
+*.ilk
+*.log
+*.obj
+*.pdb
+*.exe
