@@ -24,3 +24,6 @@ LevelCode/Vulkan/build/.vs/Assignment_2_Vulkan/v16/.suo
 *.obj
 *.pdb
 *.exe
+*.db-shm
+*.db-wal
+*.opendb
