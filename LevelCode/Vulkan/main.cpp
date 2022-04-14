@@ -26,7 +26,7 @@ int main()
 	if (+win.Create(0, 0, 800, 600, GWindowStyle::WINDOWEDBORDERED))
 	{
 		// TODO: Part 1a
-		win.SetWindowName("Spencer Frees Assignment 2 - Vulkan");
+		win.SetWindowName("Spencer Frees - Level Renderer - Vulkan");
 		VkClearValue clrAndDepth[2];
 		clrAndDepth[0].color = { {0.50f, 0.5f, 0.5f, 1} };
 		clrAndDepth[1].depthStencil = { 1.0f, 0u };
