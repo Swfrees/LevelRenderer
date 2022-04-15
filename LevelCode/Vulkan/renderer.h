@@ -6,17 +6,17 @@
 	#pragma comment(lib, "shaderc_combined.lib") 
 #endif
 #include "Parser.h"
-#define MAX_SUBMESH_PER_DRAW 1024
-struct SHADER_MODEL_DATA
-{
-	//globally shared model data
-	GW::MATH::GVECTORF sundirection, sunColor; //lighting info
-	GW::MATH::GVECTORF camEye, sunAmbient;
-	GW::MATH::GMATRIXF viewMatrix, projectionMatrix; //viewing info
-	//per sub-mesh transform and material data
-	GW::MATH::GMATRIXF matricies[MAX_SUBMESH_PER_DRAW];
-	OBJ_ATTRIBUTES materials[MAX_SUBMESH_PER_DRAW];
-};
+//#define MAX_SUBMESH_PER_DRAW 1024
+//struct SHADER_MODEL_DATA
+//{
+//	//globally shared model data
+//	GW::MATH::GVECTORF sundirection, sunColor; //lighting info
+//	GW::MATH::GVECTORF camEye, sunAmbient;
+//	GW::MATH::GMATRIXF viewMatrix, projectionMatrix; //viewing info
+//	//per sub-mesh transform and material data
+//	GW::MATH::GMATRIXF matricies[MAX_SUBMESH_PER_DRAW];
+//	OBJ_ATTRIBUTES materials[MAX_SUBMESH_PER_DRAW];
+//};
 
 std::string ShaderAsString(const char* shaderFilePath) {
 	std::string output;
@@ -34,6 +34,9 @@ std::string ShaderAsString(const char* shaderFilePath) {
 // Creation, Rendering & Cleanup
 class Renderer
 {
+
+	Level Level1 = {};
+
 	// TODO: Part 2b
 	
 	// proxy handles
@@ -95,7 +98,7 @@ public:
 		win.GetClientHeight(height);
 		vlk.GetAspectRatio(aspect);
 		// TODO: Part 2a
-		ParseLevel("..\\GameLevel.txt");
+
 		//mathOperator.RotateYGlobalF(worldMatrix, 3.214f, worldMatrix);
 		Eye.x = 0.75f;
 		Eye.y = 0.25f;
@@ -127,10 +130,10 @@ public:
 		modelData.sunColor = lightColor;
 		modelData.camEye = Eye;
 		modelData.sunAmbient = sunAmbient;
-		modelData.matricies[0] = worldMatrix;
-		modelData.matricies[1] = rotationWorldMatrix;
-		modelData.materials[0] = FSLogo_materials[0].attrib;
-		modelData.materials[1] = FSLogo_materials[1].attrib;
+		//modelData.matricies[0] = worldMatrix;
+		//modelData.matricies[1] = rotationWorldMatrix;
+		//modelData.materials[0] = FSLogo_materials[0].attrib;
+		//modelData.materials[1] = FSLogo_materials[1].attrib;
 
 		// TODO: Part 2b
 		// TODO: Part 4g
@@ -141,6 +144,11 @@ public:
 		VkPhysicalDevice physicalDevice = nullptr;
 		vlk.GetDevice((void**)&device);
 		vlk.GetPhysicalDevice((void**)&physicalDevice);
+
+		Level1 = ParseLevel("..\\GameLevel.txt");
+		LoadLevel(Level1, device, physicalDevice);
+		SetupModelData(Level1, modelData);
+
 
 		// TODO: Part 1c
 		// Create Vertex Buffer
@@ -464,27 +472,29 @@ public:
 		vkCmdSetScissor(commandBuffer, 0, 1, &scissor);
 		vkCmdBindPipeline(commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, pipeline);
 		
-		for (size_t i = 0; i < descriptorSet.size(); i++)
+		/*for (size_t i = 0; i < descriptorSet.size(); i++)
 		{
 			vkCmdBindDescriptorSets(commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS,
 				pipelineLayout, 0, 1, &descriptorSet[i], 0, nullptr);
-		}
+		}*/
 		
 
 		// now we can draw
 		VkDeviceSize offsets[] = { 0 };
-		vkCmdBindVertexBuffers(commandBuffer, 0, 1, &vertexHandle, offsets);
+		//vkCmdBindVertexBuffers(commandBuffer, 0, 1, &vertexHandle, offsets);
 		// TODO: Part 1h
-		vkCmdBindIndexBuffer(commandBuffer, indexHandle, *offsets, VK_INDEX_TYPE_UINT32);
+		//vkCmdBindIndexBuffer(commandBuffer, indexHandle, *offsets, VK_INDEX_TYPE_UINT32);
 		// TODO: Part 4d
 		// TODO: Part 2i
 		// TODO: Part 3b
 			// TODO: Part 3d
-		for (size_t i = 0; i < FSLogo_meshcount; i++)
-		{
-			vkCmdPushConstants(commandBuffer, pipelineLayout, (VK_SHADER_STAGE_VERTEX_BIT | VK_SHADER_STAGE_FRAGMENT_BIT), *offsets, sizeof(unsigned int), &i);
-			vkCmdDrawIndexed(commandBuffer, FSLogo_meshes[i].indexCount, 1, FSLogo_meshes[i].indexOffset , *offsets, 0); // TODO: Part 1d, 1h
-		}
+		//for (size_t i = 0; i < FSLogo_meshcount; i++)
+		//{
+		//	vkCmdPushConstants(commandBuffer, pipelineLayout, (VK_SHADER_STAGE_VERTEX_BIT | VK_SHADER_STAGE_FRAGMENT_BIT), *offsets, sizeof(unsigned int), &i);
+		//	vkCmdDrawIndexed(commandBuffer, FSLogo_meshes[i].indexCount, 1, FSLogo_meshes[i].indexOffset , *offsets, 0); // TODO: Part 1d, 1h
+		//}
+
+		RenderModels(Level1, descriptorSet, commandBuffer, pipelineLayout, offsets);
 		
 	}
 	

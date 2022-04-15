@@ -46,6 +46,7 @@ StructuredBuffer<SHADER_MODEL_DATA> SceneData;
 cbuffer MESH_INDEX
 {
     uint MESH_ID;
+    //uint MATERIAL_ID;
 };
 
 // TODO: Part 2b

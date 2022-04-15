@@ -57,6 +57,7 @@ StructuredBuffer<SHADER_MODEL_DATA> SceneData;
 cbuffer MESH_INDEX
 {
     uint MESH_ID;
+    //uint MATERIAL_ID;
 };
 
 OBJ_VERT_OUT main(float4 position : POSITION, float3 UV : TEXCOORD0, float3 Normal : NORMAL)
