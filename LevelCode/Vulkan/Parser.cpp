@@ -82,7 +82,7 @@ Level ParseLevel(std::string LevelName)
 
 			for (size_t i = 0; i < floats.size(); i++)
 			{
-				if ((int)floats.at(i) != (int)',' && (int)floats.at(i) != (int)"\n")
+				if ((int)floats.at(i) != (int)',' && (int)floats.at(i) != (int)'\n')
 				{
 					TempString += floats.at(i);
 				}
@@ -109,17 +109,17 @@ Level ParseLevel(std::string LevelName)
 
 	for (int i = 0; i < ReturnLevel.LevelObjects.size(); i++) {
 		std::cout << (int)ReturnLevel.LevelObjects[i].ObjectType << "\n" << ReturnLevel.LevelObjects[i].ObjectName << "\n";
-		for (int i = 0; i < 4; i++)
-			std::cout << ReturnLevel.LevelObjects[i].ObjectWorldMatrix.row1.data[i] << " ";
+		for (int j = 0; j < 4; j++)
+			std::cout << ReturnLevel.LevelObjects[i].ObjectWorldMatrix.row1.data[j] << " ";
 		std::cout << "\n";
-		for (int i = 0; i < 4; i++)
-			std::cout << ReturnLevel.LevelObjects[i].ObjectWorldMatrix.row2.data[i] << " ";
+		for (int j = 0; j < 4; j++)
+			std::cout << ReturnLevel.LevelObjects[i].ObjectWorldMatrix.row2.data[j] << " ";
 		std::cout << "\n";
-		for (int i = 0; i < 4; i++)
-			std::cout << ReturnLevel.LevelObjects[i].ObjectWorldMatrix.row3.data[i] << " ";
+		for (int j = 0; j < 4; j++)
+			std::cout << ReturnLevel.LevelObjects[i].ObjectWorldMatrix.row3.data[j] << " ";
 		std::cout << "\n";
-		for (int i = 0; i < 4; i++)
-			std::cout << ReturnLevel.LevelObjects[i].ObjectWorldMatrix.row4.data[i] << " ";
+		for (int j = 0; j < 4; j++)
+			std::cout << ReturnLevel.LevelObjects[i].ObjectWorldMatrix.row4.data[j] << " ";
 		std::cout << "\n\n";
 	}
 

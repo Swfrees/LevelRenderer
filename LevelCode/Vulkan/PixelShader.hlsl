@@ -46,7 +46,7 @@ StructuredBuffer<SHADER_MODEL_DATA> SceneData;
 cbuffer MESH_INDEX
 {
     uint MESH_ID;
-    //uint MATERIAL_ID;
+    uint MATERIAL_ID;
 };
 
 // TODO: Part 2b
@@ -61,7 +61,7 @@ float4 main(OBJ_VERT_OUT inputVertex) : SV_TARGET
     float3 sundirectionCopy = -normalize(SceneData[0].sundirection.xyz);
     float LightRatio = saturate(dot(sundirectionCopy, inputVertex.nrm));
 	//LightRatio = saturate(LightRatio + SceneData[0].sunAmbient);
-    float4 colorset = float4(SceneData[0].materials[MESH_ID].Kd, 1);
+    float4 colorset = float4(SceneData[MATERIAL_ID].materials[MESH_ID].Kd, 1);
     float4 ambientResult = SceneData[0].sunAmbient * colorset;
     float4 LightDirectResult = LightRatio * SceneData[0].sunColor * colorset;
 	//LightDirectResult = LightDirectResult * SceneData[0].sunColor;
@@ -70,8 +70,8 @@ float4 main(OBJ_VERT_OUT inputVertex) : SV_TARGET
 
     float3 VIEWDIR = normalize(SceneData[0].camEye.xyz - inputVertex.worldPos.xyz);
     float3 HALFVECTOR = normalize(sundirectionCopy + VIEWDIR);
-    float INTENSITY = pow(saturate(dot(inputVertex.nrm.xyz, HALFVECTOR)), SceneData[0].materials[MESH_ID].Ns);
-    float4 REFLECTEDLIGHT = SceneData[0].sunColor * float4(SceneData[0].materials[MESH_ID].Ks, 0) * INTENSITY;
+    float INTENSITY = pow(saturate(dot(inputVertex.nrm.xyz, HALFVECTOR)), SceneData[MATERIAL_ID].materials[MESH_ID].Ns);
+    float4 REFLECTEDLIGHT = SceneData[0].sunColor * float4(SceneData[MATERIAL_ID].materials[MESH_ID].Ks, 0) * INTENSITY;
 	
 
     return saturate(REFLECTEDLIGHT + DiffuseResult + ambientResult);

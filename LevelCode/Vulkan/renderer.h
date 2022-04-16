@@ -100,8 +100,8 @@ public:
 		// TODO: Part 2a
 
 		//mathOperator.RotateYGlobalF(worldMatrix, 3.214f, worldMatrix);
-		Eye.x = 0.75f;
-		Eye.y = 0.25f;
+		Eye.x = -0.75f;
+		Eye.y = -0.50f;
 		Eye.z = -1.5f;
 		Look.x = 0.15f;
 		Look.y = 0.75f;
