@@ -5,7 +5,11 @@
 #ifdef _WIN32 // must use MT platform DLL libraries on windows
 	#pragma comment(lib, "shaderc_combined.lib") 
 #endif
+#include "XTime.h"
 #include "Parser.h"
+
+const double pi = 3.14159265358979323846;
+
 //#define MAX_SUBMESH_PER_DRAW 1024
 //struct SHADER_MODEL_DATA
 //{
@@ -71,6 +75,9 @@ class Renderer
 		
 	// TODO: Part 2a
 	GW::MATH::GMatrix mathOperator = GW::MATH::GMatrix();
+	GW::MATH::GMatrix ProxyMatrix = GW::MATH::GMatrix();
+	GW::INPUT::GInput ProxyInput = GW::INPUT::GInput();
+	GW::INPUT::GController ProxyController = GW::INPUT::GController();
 	GW::MATH::GMATRIXF worldMatrix = GW::MATH::GIdentityMatrixF;
 	GW::MATH::GMATRIXF rotationWorldMatrix = GW::MATH::GIdentityMatrixF;
 	GW::MATH::GMATRIXF viewMatrix = GW::MATH::GIdentityMatrixF;
@@ -86,26 +93,30 @@ class Renderer
 	SHADER_MODEL_DATA modelData = SHADER_MODEL_DATA();
 	// TODO: Part 2b
 	// TODO: Part 4g
+	
 public:
-
+	float aspect;
 	Renderer(GW::SYSTEM::GWindow _win, GW::GRAPHICS::GVulkanSurface _vlk)
 	{
 		win = _win;
 		vlk = _vlk;
 		unsigned int width, height;
-		float aspect;
 		win.GetClientWidth(width);
 		win.GetClientHeight(height);
 		vlk.GetAspectRatio(aspect);
 		// TODO: Part 2a
 
+		ProxyMatrix.Create();
+		ProxyInput.Create(win);
+		ProxyController.Create();
+
 		//mathOperator.RotateYGlobalF(worldMatrix, 3.214f, worldMatrix);
-		Eye.x = -0.75f;
-		Eye.y = -0.50f;
-		Eye.z = -1.5f;
-		Look.x = 0.15f;
-		Look.y = 0.75f;
-		Look.z = 0.0f;
+		Eye.x = 0.0f;
+		Eye.y = 0.00f;
+		Eye.z = 0.50f;
+		Look.x = 0.0f;
+		Look.y = 5.0f;
+		Look.z = -1.50f;
 		Up.x = 0.0f;
 		Up.y = 1.0f;
 		Up.z = 0.0f;
@@ -393,7 +404,7 @@ public:
 		VkPushConstantRange constantRange;
 		constantRange.stageFlags = VK_SHADER_STAGE_VERTEX_BIT | VK_SHADER_STAGE_FRAGMENT_BIT;
 		constantRange.offset = 0;
-		constantRange.size = sizeof(unsigned int);
+		constantRange.size = sizeof(unsigned int) * 2;
 
 		// Descriptor pipeline layout
 		VkPipelineLayoutCreateInfo pipeline_layout_create_info = {};
@@ -438,20 +449,111 @@ public:
 		});
 	}
 
-	void Update()
+	GW::MATH::GMATRIXF TempViewMatrix = GW::MATH::GIdentityMatrixF;
+
+	void UpdateCamera()
 	{
-		// Adjust CPU data to reflect what we want to draw
-			GW::MATH::GMatrix::RotateYLocalF(modelData.matricies[1],
-			0.001f, modelData.matricies[1]);
-		// Copy data to this frame's buffer
+		//std::chrono::high_resolution_clock timer;
+		TempViewMatrix = modelData.viewMatrix;
+		ProxyMatrix.InverseF(TempViewMatrix, TempViewMatrix);
+		GW::MATH::GVECTORF TranslatePosition = GW::MATH::GVECTORF();
+		const float Camera_Speed = 10;
+
+		float w = 0, a = 0, s = 0, d = 0, leftshift = 0, space = 0;
+		float ControllerForwardBackward = 0, ControllerLeftRight = 0, LeftTrigger = 0, RightTrigger = 0;
+		ProxyInput.GetState(G_KEY_W, w);
+		ProxyInput.GetState(G_KEY_A, a);
+		ProxyInput.GetState(G_KEY_S, s);
+		ProxyInput.GetState(G_KEY_D, d);
+
+		ProxyController.GetState(0, G_LY_AXIS, ControllerForwardBackward);
+		ProxyController.GetState(0, G_LX_AXIS, ControllerLeftRight);
+
+		TranslatePosition.z = ((w - s) + ControllerForwardBackward) * Camera_Speed * timer.Delta();
+		TranslatePosition.x = ((d - a) + ControllerLeftRight) * Camera_Speed * timer.Delta();
+
+		/*TranslatePosition.z -= (s + ControllerForwardBackward) * Camera_Speed * timer.Delta();
+		TranslatePosition.z += (w + ControllerForwardBackward) * Camera_Speed * timer.Delta();
+		TranslatePosition.x -= (a + ControllerLeftRight) * Camera_Speed * timer.Delta();
+		TranslatePosition.x += (d + ControllerLeftRight) * Camera_Speed * timer.Delta();*/
+
+		ProxyInput.GetState(G_KEY_LEFTSHIFT, leftshift);
+		ProxyInput.GetState(G_KEY_SPACE, space);
+
+		ProxyController.GetState(0, G_LEFT_TRIGGER_AXIS, LeftTrigger);
+		ProxyController.GetState(0, G_RIGHT_TRIGGER_AXIS, RightTrigger);
+
+		float YChange = (space * Camera_Speed) - (leftshift * Camera_Speed) + (RightTrigger * Camera_Speed) - (LeftTrigger * Camera_Speed);
+		TranslatePosition.y = YChange * Camera_Speed * timer.Delta();
+		ProxyMatrix.TranslateLocalF(TempViewMatrix, TranslatePosition, TempViewMatrix);
+		GW::MATH::GVECTORF SavePosition = TempViewMatrix.row4;
+
+		float MouseX = 0, MouseY = 0;
+		float ControllerRotationX = 0, ControllerRotationY = 0;
+		unsigned int ClientWidth = 0, ClientHeight = 0;
+		win.GetClientWidth(ClientWidth);
+		win.GetClientHeight(ClientHeight);
+
+		const float Rotation_Speed = 0.05 + (pi * timer.Delta());
+
+		GW::MATH::GVECTORF CameraRotation = GW::MATH::GVECTORF();
+
+		GW::GReturn result = ProxyInput.GetMouseDelta(MouseX, MouseY);
+		ProxyController.GetState(0, G_RX_AXIS, ControllerRotationX);
+		ProxyController.GetState(0, G_RY_AXIS, ControllerRotationY);
+
+		int ControllerIndex = 0;
+		//ProxyController.GetMaxIndex(ControllerIndex);
+		bool isConnected = false;
+		GW::GReturn ControllerResult = ProxyController.IsConnected(ControllerIndex, isConnected);
+
+		if (G_PASS(result) && result != GW::GReturn::REDUNDANT)
+		{
+			CameraRotation.x += 65 * aspect * (MouseX / ClientWidth) * Rotation_Speed;
+			CameraRotation.y += 65 * (MouseY / ClientHeight) * Rotation_Speed;
+		}
+
+		if (G_PASS(ControllerResult) && ControllerResult != GW::GReturn::REDUNDANT)
+		{
+			CameraRotation.x += 65 * aspect * (ControllerRotationX / ClientWidth) * Rotation_Speed;
+			CameraRotation.y += 65 * (-ControllerRotationY / ClientHeight) * Rotation_Speed;
+		}
+
+
+		GW::MATH::GMatrix::RotateYGlobalF(TempViewMatrix, CameraRotation.x, TempViewMatrix);
+		GW::MATH::GMatrix::RotateXLocalF(TempViewMatrix, CameraRotation.y, TempViewMatrix);
+		TempViewMatrix.row4 = SavePosition;
+
+		ProxyMatrix.InverseF(TempViewMatrix, TempViewMatrix);
+
+		modelData.viewMatrix = TempViewMatrix;
+
 		unsigned int currentBuffer;
 		vlk.GetSwapchainCurrentImage(currentBuffer);
 		GvkHelper::write_to_buffer(device,
 			storageData[currentBuffer], &modelData, sizeof(SHADER_MODEL_DATA));
+
+	}
+
+	XTime timer = XTime();
+
+	void Update()
+	{
+
+		timer.Signal();
+		UpdateCamera();
+
+		// Adjust CPU data to reflect what we want to draw
+			//GW::MATH::GMatrix::RotateYLocalF(modelData.matricies[1],
+			//0.001f, modelData.matricies[1]);
+		// Copy data to this frame's buffer
+		//unsigned int currentBuffer;
+		//vlk.GetSwapchainCurrentImage(currentBuffer);
+		//GvkHelper::write_to_buffer(device,
+		//	storageData[currentBuffer], &modelData, sizeof(SHADER_MODEL_DATA));
 	}
 	void Render()
 	{
-		Update();
 		// TODO: Part 2a
 		// TODO: Part 4d
 		// grab the current Vulkan commandBuffer
@@ -511,6 +613,8 @@ private:
 
 		storageData.clear();
 		storageHandle.clear();
+
+		LevelCleanup(Level1, device);
 
 		vkDestroyDescriptorSetLayout(device, descriptorLayout, nullptr);
 		vkDestroyDescriptorPool(device, descriptorPool, nullptr);

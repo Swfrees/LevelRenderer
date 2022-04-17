@@ -176,12 +176,16 @@ void LoadLevel(Level &InputLevel, VkDevice& device, VkPhysicalDevice& physicalDe
 	}
 }
 
-void SetupModelData(Level InputLevel, SHADER_MODEL_DATA &modelData)
+void SetupModelData(Level &InputLevel, SHADER_MODEL_DATA &modelData)
 {
-	for (size_t i = 0; i < InputLevel.LevelModels.size(); i++)
+	for (size_t i = 0, m = 0; i < InputLevel.LevelModels.size(); i++)
 	{
 		modelData.matricies[i] = InputLevel.LevelModels[i].ModelWorldMatrix;
-		modelData.materials[i] = InputLevel.LevelModels[i].ModelMaterials[0].attrib;
+		for (size_t j = 0; j < InputLevel.LevelModels[i].ModelSubmeshes.size(); j++, m++)
+		{
+			InputLevel.LevelModels[i].SubmeshMaterials.push_back(InputLevel.LevelModels[i].SubmeshMaterials.size());
+			modelData.materials[m] = InputLevel.LevelModels[i].ModelMaterials[j].attrib;
+		}
 	}
 }
 
@@ -193,6 +197,9 @@ struct UINT2
 
 void RenderModels(Level InputLevel, std::vector<VkDescriptorSet> descriptorSet, VkCommandBuffer &commandBuffer, VkPipelineLayout &pipelineLayout, VkDeviceSize *offsets)
 {
+
+	int m = 0;
+
 	for (size_t i = 0; i < InputLevel.LevelModels.size(); i++)
 	{
 
@@ -205,13 +212,27 @@ void RenderModels(Level InputLevel, std::vector<VkDescriptorSet> descriptorSet, 
 				pipelineLayout, 0, 1, &descriptorSet[j], 0, nullptr);
 		}
 
-		for (size_t j = 0; j < InputLevel.LevelModels[i].ModelSubmeshes.size(); j++)
+
+		for (size_t j = 0; j < InputLevel.LevelModels[i].ModelSubmeshes.size(); j++, m++)
 		{
 			UINT2 PushInts = {};
 			PushInts.x = i;
-			PushInts.y = i;
-			vkCmdPushConstants(commandBuffer, pipelineLayout, (VK_SHADER_STAGE_VERTEX_BIT | VK_SHADER_STAGE_FRAGMENT_BIT), *offsets, sizeof(unsigned int), &i);
+			PushInts.y = InputLevel.LevelModels[i].SubmeshMaterials[j];
+			vkCmdPushConstants(commandBuffer, pipelineLayout, (VK_SHADER_STAGE_VERTEX_BIT | VK_SHADER_STAGE_FRAGMENT_BIT), *offsets, sizeof(unsigned int) * 2, &PushInts);
 			vkCmdDrawIndexed(commandBuffer, InputLevel.LevelModels[i].ModelSubmeshes[j].indexCount, 1, InputLevel.LevelModels[i].ModelSubmeshes[j].indexOffset, *offsets, 0);
 		}
 	}
+}
+
+void LevelCleanup(Level &InputLevel, VkDevice &device)
+{
+	vkDeviceWaitIdle(device);
+
+	for (int i = 0; i < InputLevel.LevelModels.size(); ++i) {
+		vkDestroyBuffer(device, InputLevel.LevelModels[i].ModelVertexBuffer, nullptr);
+		vkFreeMemory(device, InputLevel.LevelModels[i].ModelVertexMemory, nullptr);
+		vkDestroyBuffer(device, InputLevel.LevelModels[i].ModelIndexBuffer, nullptr);
+		vkFreeMemory(device, InputLevel.LevelModels[i].ModelIndexMemory, nullptr);
+	}
+
 }

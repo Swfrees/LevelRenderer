@@ -10,6 +10,9 @@
 #define GATEWARE_DISABLE_GRASTERSURFACE // we have another template for this
 #define GATEWARE_DISABLE_GOPENGLSURFACE // we have another template for this
 // With what we want & what we don't defined we can include the API
+#define GATEWARE_ENABLE_MATH
+#define GATEWARE_ENABLE_INPUT
+
 #include "../Gateware/Gateware.h"
 #include "renderer.h"
 // open some namespaces to compact the code a bit
@@ -54,6 +57,7 @@ int main()
 			{
 				if (+vulkan.StartFrame(2, clrAndDepth))
 				{
+					renderer.Update();
 					renderer.Render();
 					vulkan.EndFrame(true);
 				}

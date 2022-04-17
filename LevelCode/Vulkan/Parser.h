@@ -32,6 +32,8 @@ struct Model
 
 	GW::MATH::GMATRIXF ModelWorldMatrix;
 
+	std::vector<int> SubmeshMaterials;
+
 };
 
 struct LevelObject
@@ -63,5 +65,6 @@ struct SHADER_MODEL_DATA
 
 Level ParseLevel(std::string LevelName);
 void LoadLevel(Level& InputLevel, VkDevice& device, VkPhysicalDevice& physicalDevice);
-void SetupModelData(Level InputLevel, SHADER_MODEL_DATA &modelData);
+void SetupModelData(Level &InputLevel, SHADER_MODEL_DATA &modelData);
 void RenderModels(Level InputLevel, std::vector<VkDescriptorSet> descriptorSet, VkCommandBuffer& commandBuffer, VkPipelineLayout& pipelineLayout, VkDeviceSize* offsets);
+void LevelCleanup(Level& InputLevel, VkDevice& device);
