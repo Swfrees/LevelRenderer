@@ -16,6 +16,12 @@ enum ObjectType
 	LIGHT
 };
 
+enum LightType
+{
+	POINT,
+	DIRECTIONAL
+};
+
 struct Model
 {
 	std::string ModelName;
@@ -36,6 +42,16 @@ struct Model
 
 };
 
+struct Light
+{
+	LightType LightType;
+
+	GW::MATH::GVECTORF LightPosition;
+	GW::MATH::GVECTORF LightDirection;
+	GW::MATH::GVECTORF LightColor;
+	float Falloff;
+};
+
 struct LevelObject
 {
 	ObjectType ObjectType;
@@ -48,6 +64,7 @@ struct Level
 	std::string LevelPath;
 	std::vector <LevelObject> LevelObjects;
 	std::vector<Model> LevelModels;
+	std::vector<Light> LevelLights;
 	//std::vector<DirectionLight> DirectionalLights;
 	//std::vector<PointLight> PointLights;
 };

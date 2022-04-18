@@ -147,10 +147,12 @@ void LoadLevel(Level &InputLevel, VkDevice& device, VkPhysicalDevice& physicalDe
 
 			std::string TempString = "";
 			TempString = (std::string)_getcwd(NULL, 0);
+
 			for (size_t i = TempString.size() - 1; TempString.at(i) != '\\'; i--)
 			{
 				TempString.erase(i);
 			}
+
 			TempString.append("Model\\");
 			TempString.append(InputLevel.LevelObjects[i].ObjectName);
 			TempString.append(".h2b");
@@ -173,6 +175,28 @@ void LoadLevel(Level &InputLevel, VkDevice& device, VkPhysicalDevice& physicalDe
 				VK_MEMORY_PROPERTY_HOST_COHERENT_BIT, &InputLevel.LevelModels[CurrentIndex].ModelIndexBuffer, &InputLevel.LevelModels[CurrentIndex].ModelIndexMemory);
 			GvkHelper::write_to_buffer(device, InputLevel.LevelModels[CurrentIndex].ModelIndexMemory, InputLevel.LevelModels[CurrentIndex].ModelIndices.data(), sizeof(unsigned int) * InputLevel.LevelModels[CurrentIndex].ModelIndices.size());
 		}
+
+		else if (InputLevel.LevelObjects[i].ObjectType == LIGHT)
+		{
+			Light TempLight = {};
+			TempLight.LightColor = InputLevel.LevelObjects[i].ObjectWorldMatrix.row2;
+
+			if (InputLevel.LevelObjects[i].ObjectName == "Point")
+			{
+				TempLight.LightType = POINT;
+				TempLight.LightPosition = InputLevel.LevelObjects[i].ObjectWorldMatrix.row4;
+				TempLight.Falloff = InputLevel.LevelObjects[i].ObjectWorldMatrix.row1.x;
+			}
+
+			else
+			{
+				TempLight.LightType = DIRECTIONAL;
+				TempLight.LightDirection = InputLevel.LevelObjects[i].ObjectWorldMatrix.row1;
+			}
+
+			InputLevel.LevelLights.push_back(TempLight);
+		}
+
 	}
 }
 
@@ -197,6 +221,11 @@ struct UINT2
 
 void RenderModels(Level InputLevel, std::vector<VkDescriptorSet> descriptorSet, VkCommandBuffer &commandBuffer, VkPipelineLayout &pipelineLayout, VkDeviceSize *offsets)
 {
+
+	//if (ShouldRender == false)
+	//{
+	//	return;
+	//}
 
 	int m = 0;
 
