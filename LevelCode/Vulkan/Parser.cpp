@@ -217,7 +217,7 @@ void RenderModels(Level InputLevel, std::vector<VkDescriptorSet> descriptorSet, 
 		{
 			UINT2 PushInts = {};
 			PushInts.x = i;
-			PushInts.y = InputLevel.LevelModels[i].SubmeshMaterials[j];
+			PushInts.y = m /*InputLevel.LevelModels[i].SubmeshMaterials[i + j]*/;
 			vkCmdPushConstants(commandBuffer, pipelineLayout, (VK_SHADER_STAGE_VERTEX_BIT | VK_SHADER_STAGE_FRAGMENT_BIT), *offsets, sizeof(unsigned int) * 2, &PushInts);
 			vkCmdDrawIndexed(commandBuffer, InputLevel.LevelModels[i].ModelSubmeshes[j].indexCount, 1, InputLevel.LevelModels[i].ModelSubmeshes[j].indexOffset, *offsets, 0);
 		}
