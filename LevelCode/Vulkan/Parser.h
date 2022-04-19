@@ -16,11 +16,11 @@ enum ObjectType
 	LIGHT
 };
 
-enum LightType
-{
-	POINT,
-	DIRECTIONAL
-};
+//enum LightType
+//{
+//	POINT,
+//	DIRECTIONAL
+//};
 
 struct Model
 {
@@ -44,7 +44,7 @@ struct Model
 
 struct Light
 {
-	LightType LightType;
+	//LightType LightType;
 
 	GW::MATH::GVECTORF LightPosition;
 	GW::MATH::GVECTORF LightDirection;

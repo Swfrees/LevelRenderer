@@ -176,7 +176,7 @@ void LoadLevel(Level &InputLevel, VkDevice& device, VkPhysicalDevice& physicalDe
 			GvkHelper::write_to_buffer(device, InputLevel.LevelModels[CurrentIndex].ModelIndexMemory, InputLevel.LevelModels[CurrentIndex].ModelIndices.data(), sizeof(unsigned int) * InputLevel.LevelModels[CurrentIndex].ModelIndices.size());
 		}
 
-		else if (InputLevel.LevelObjects[i].ObjectType == LIGHT)
+		/*else if (InputLevel.LevelObjects[i].ObjectType == LIGHT)
 		{
 			Light TempLight = {};
 			TempLight.LightColor = InputLevel.LevelObjects[i].ObjectWorldMatrix.row2;
@@ -195,7 +195,7 @@ void LoadLevel(Level &InputLevel, VkDevice& device, VkPhysicalDevice& physicalDe
 			}
 
 			InputLevel.LevelLights.push_back(TempLight);
-		}
+		}*/
 
 	}
 }
