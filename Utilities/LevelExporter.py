@@ -42,6 +42,10 @@ def print_heir(ob, levels=10):
         converted[2][0:3] = row_world[2][0], row_world[2][2], row_world[2][1] 
         converted[3][0:3] = row_world[3][0], row_world[3][2], row_world[3][1]  
         
+        if 'Point' in ob.name:
+            converted[0][0] = ob.data.cutoff_distance
+            converted[1][0:3] = ob.data.color[0], ob.data.color[1], ob.data.color[2]
+        
         # flip the local Z axis for winding and transpose for export
         scaleZ = mathutils.Matrix.Scale(-1.0, 4, (0.0, 0.0, 1.0))
         converted = scaleZ.transposed() @ converted  

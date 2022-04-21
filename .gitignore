@@ -28,3 +28,4 @@ LevelCode/Vulkan/build/.vs/Assignment_2_Vulkan/v16/.suo
 *.db-wal
 *.opendb
 *.mtl
+*.h
