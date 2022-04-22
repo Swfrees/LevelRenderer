@@ -39,7 +39,7 @@ std::string ShaderAsString(const char* shaderFilePath) {
 class Renderer
 {
 
-	Level Level1 = {};
+	Level LevelObject = {};
 
 	// TODO: Part 2b
 	
@@ -156,9 +156,9 @@ public:
 		vlk.GetDevice((void**)&device);
 		vlk.GetPhysicalDevice((void**)&physicalDevice);
 
-		Level1 = ParseLevel("..\\GameLevel.txt");
-		LoadLevel(Level1, device, physicalDevice);
-		SetupModelData(Level1, modelData);
+		LevelObject = ParseLevel("..\\FirstLevel.txt");
+		LoadLevel(LevelObject, device, physicalDevice);
+		SetupModelData(LevelObject, modelData);
 
 
 		// TODO: Part 1c
@@ -457,7 +457,7 @@ public:
 		TempViewMatrix = modelData.viewMatrix;
 		ProxyMatrix.InverseF(TempViewMatrix, TempViewMatrix);
 		GW::MATH::GVECTORF TranslatePosition = GW::MATH::GVECTORF();
-		const float Camera_Speed = 10;
+		const float Camera_Speed = 5;
 
 		float w = 0, a = 0, s = 0, d = 0, leftshift = 0, space = 0;
 		float ControllerForwardBackward = 0, ControllerLeftRight = 0, LeftTrigger = 0, RightTrigger = 0;
@@ -596,7 +596,7 @@ public:
 		//	vkCmdDrawIndexed(commandBuffer, FSLogo_meshes[i].indexCount, 1, FSLogo_meshes[i].indexOffset , *offsets, 0); // TODO: Part 1d, 1h
 		//}
 
-		RenderModels(Level1, descriptorSet, commandBuffer, pipelineLayout, offsets);
+		RenderModels(LevelObject, descriptorSet, commandBuffer, pipelineLayout, offsets);
 		
 	}
 	
@@ -614,7 +614,7 @@ private:
 		storageData.clear();
 		storageHandle.clear();
 
-		LevelCleanup(Level1, device);
+		LevelCleanup(LevelObject, device);
 
 		vkDestroyDescriptorSetLayout(device, descriptorLayout, nullptr);
 		vkDestroyDescriptorPool(device, descriptorPool, nullptr);
