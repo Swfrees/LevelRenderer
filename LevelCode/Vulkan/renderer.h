@@ -91,11 +91,15 @@ class Renderer
 	GW::MATH::GVECTORF sunAmbient = GW::MATH::GVECTORF();
 
 	SHADER_MODEL_DATA modelData = SHADER_MODEL_DATA();
+
+	std::vector<std::string> LevelVector = std::vector<std::string>();
+	int LevelNumber = 0;
 	// TODO: Part 2b
 	// TODO: Part 4g
 	
 public:
 	float aspect;
+	VkPhysicalDevice physicalDevice = nullptr;
 	Renderer(GW::SYSTEM::GWindow _win, GW::GRAPHICS::GVulkanSurface _vlk)
 	{
 		win = _win;
@@ -152,59 +156,17 @@ public:
 
 		/***************** GEOMETRY INTIALIZATION ******************/
 		// Grab the device & physical device so we can allocate some stuff
-		VkPhysicalDevice physicalDevice = nullptr;
+		
 		vlk.GetDevice((void**)&device);
 		vlk.GetPhysicalDevice((void**)&physicalDevice);
 
-		LevelObject.LevelIndex = 0;
-		LevelObject.LastLevelPassed = false;
-		LevelObject.renderingFlag = false;
+		LevelVector.push_back("..\\FirstLevel.txt");
+		LevelVector.push_back("..\\SecondLevel.txt");
 
-		if (LevelObject.LevelIndex == 0)
-		{
-			if (LevelObject.LastLevelPassed == true)
-			{
-				std::cout << "Cleaning Second Level" << "\n";
-				LevelCleanup(LevelObject, device);
-			}
-			std::cout << "Loading First Level" << "\n";
-			LevelObject = ParseLevel("..\\FirstLevel.txt");
-			LoadLevel(LevelObject, device, physicalDevice);
-			SetupModelData(LevelObject, modelData);
-			LevelObject.renderingFlag = false;
-		}
-
-		float f1 = 0, XButton = 0;
-		ProxyInput.GetState(G_KEY_F1, f1);
-		ProxyController.GetState(0, G_WEST_BTN, XButton);
-
-		if (f1 != 0 || XButton != 0)
-		{
-
-			std::cout << "Switching Levels" << "\n";
-			LevelObject.LevelIndex++;
-			LevelObject.renderingFlag = true;
-		}
-
-		if (LevelObject.LevelIndex == 1)
-		{
-
-			std::cout << "Cleaning First Level" << "\n";
-			LevelCleanup(LevelObject, device);
-			std::cout << "Loading Second Level" << "\n";
-			LevelObject = ParseLevel("..\\SecondLevel.txt");
-			LoadLevel(LevelObject, device, physicalDevice);
-			SetupModelData(LevelObject, modelData);
-			LevelObject.renderingFlag = false;
-		}
-
-		if (LevelObject.LevelIndex == 2)
-		{
-
-			LevelObject.LevelIndex == 0;
-			LevelObject.LastLevelPassed = true;
-		}
-
+		std::cout << "Loading First Level" << "\n";
+		LevelObject = ParseLevel(LevelVector[LevelNumber]);
+		LoadLevel(LevelObject, device, physicalDevice);
+		SetupModelData(LevelObject, modelData);
 
 		// TODO: Part 1c
 		// Create Vertex Buffer
@@ -580,6 +542,17 @@ public:
 
 	}
 
+
+
+	void LevelSwap(Level &InputLevel, VkDevice& device, VkPhysicalDevice& physicalDevice)
+	{
+		LevelCleanup(InputLevel, device);
+		std::cout << "Loading First Level" << "\n";
+		InputLevel = ParseLevel(LevelVector[LevelNumber]);
+		LoadLevel(InputLevel, device, physicalDevice);
+		SetupModelData(InputLevel, modelData);
+	}
+
 	XTime timer = XTime();
 
 	void Update()
@@ -587,6 +560,18 @@ public:
 
 		timer.Signal();
 		UpdateCamera();
+		
+		if (GetAsyncKeyState(VK_F1) &0x8000)
+		{
+			LevelNumber++;
+			if (LevelNumber >= LevelVector.size())
+			{
+				LevelNumber = 0;
+			}
+
+			LevelSwap(LevelObject, device, physicalDevice);
+		}
+
 
 		// Adjust CPU data to reflect what we want to draw
 			//GW::MATH::GMatrix::RotateYLocalF(modelData.matricies[1],
