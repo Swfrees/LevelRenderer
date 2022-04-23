@@ -156,9 +156,54 @@ public:
 		vlk.GetDevice((void**)&device);
 		vlk.GetPhysicalDevice((void**)&physicalDevice);
 
-		LevelObject = ParseLevel("..\\FirstLevel.txt");
-		LoadLevel(LevelObject, device, physicalDevice);
-		SetupModelData(LevelObject, modelData);
+		LevelObject.LevelIndex = 0;
+		LevelObject.LastLevelPassed = false;
+		LevelObject.renderingFlag = false;
+
+		if (LevelObject.LevelIndex == 0)
+		{
+			if (LevelObject.LastLevelPassed == true)
+			{
+				std::cout << "Cleaning Second Level" << "\n";
+				LevelCleanup(LevelObject, device);
+			}
+			std::cout << "Loading First Level" << "\n";
+			LevelObject = ParseLevel("..\\FirstLevel.txt");
+			LoadLevel(LevelObject, device, physicalDevice);
+			SetupModelData(LevelObject, modelData);
+			LevelObject.renderingFlag = false;
+		}
+
+		float f1 = 0, XButton = 0;
+		ProxyInput.GetState(G_KEY_F1, f1);
+		ProxyController.GetState(0, G_WEST_BTN, XButton);
+
+		if (f1 != 0 || XButton != 0)
+		{
+
+			std::cout << "Switching Levels" << "\n";
+			LevelObject.LevelIndex++;
+			LevelObject.renderingFlag = true;
+		}
+
+		if (LevelObject.LevelIndex == 1)
+		{
+
+			std::cout << "Cleaning First Level" << "\n";
+			LevelCleanup(LevelObject, device);
+			std::cout << "Loading Second Level" << "\n";
+			LevelObject = ParseLevel("..\\SecondLevel.txt");
+			LoadLevel(LevelObject, device, physicalDevice);
+			SetupModelData(LevelObject, modelData);
+			LevelObject.renderingFlag = false;
+		}
+
+		if (LevelObject.LevelIndex == 2)
+		{
+
+			LevelObject.LevelIndex == 0;
+			LevelObject.LastLevelPassed = true;
+		}
 
 
 		// TODO: Part 1c

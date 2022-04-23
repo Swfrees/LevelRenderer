@@ -65,6 +65,9 @@ struct Level
 	std::vector <LevelObject> LevelObjects;
 	std::vector<Model> LevelModels;
 	std::vector<Light> LevelLights;
+	int LevelIndex;
+	bool LastLevelPassed;
+	bool renderingFlag;
 	//add bool for renderingflag
 	//std::vector<DirectionLight> DirectionalLights;
 	//std::vector<PointLight> PointLights;

@@ -222,10 +222,10 @@ struct UINT2
 void RenderModels(Level InputLevel, std::vector<VkDescriptorSet> descriptorSet, VkCommandBuffer &commandBuffer, VkPipelineLayout &pipelineLayout, VkDeviceSize *offsets)
 {
 
-	//if (ShouldRender == false)
-	//{
-	//	return;
-	//}
+	if (InputLevel.renderingFlag == false)
+	{
+		return;
+	}
 
 	int m = 0;
 
