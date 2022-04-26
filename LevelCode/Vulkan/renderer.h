@@ -141,10 +141,12 @@ public:
 
 		modelData.viewMatrix = viewMatrix;
 		modelData.projectionMatrix = projectionMatrix;
-		modelData.sundirection = LightDirection;
-		modelData.sunColor = lightColor;
+		modelData.DirectionalLightDirection[0] = LightDirection;
+		modelData.DirectionalLightColor[0] = lightColor;
+		modelData.DirectionalLightCount = 1;
 		modelData.camEye = Eye;
 		modelData.sunAmbient = sunAmbient;
+
 		//modelData.matricies[0] = worldMatrix;
 		//modelData.matricies[1] = rotationWorldMatrix;
 		//modelData.materials[0] = FSLogo_materials[0].attrib;
@@ -167,6 +169,14 @@ public:
 		LevelObject = ParseLevel(LevelVector[LevelNumber]);
 		LoadLevel(LevelObject, device, physicalDevice);
 		SetupModelData(LevelObject, modelData);
+
+		for (size_t i = 0; i < LevelObject.LevelLights.size(); i++)
+		{
+			modelData.PointLightColor[i] = LevelObject.LevelLights[i].LightColor;
+			modelData.PointLightPosition[i] = LevelObject.LevelLights[i].LightPosition;
+			modelData.PointLightFalloffs[i] = LevelObject.LevelLights[i].Falloff;
+			modelData.PointLightCount += 1;
+		}
 
 		// TODO: Part 1c
 		// Create Vertex Buffer
@@ -572,6 +582,17 @@ public:
 			LevelSwap(LevelObject, device, physicalDevice);
 		}
 
+		if (GetAsyncKeyState('R') & 0x1)
+		{
+			mathOperator.LookAtLHF(Eye, Look, Up, viewMatrix);
+
+			modelData.viewMatrix = viewMatrix;
+
+			unsigned int currentBuffer;
+			vlk.GetSwapchainCurrentImage(currentBuffer);
+			GvkHelper::write_to_buffer(device,
+				storageData[currentBuffer], &modelData, sizeof(SHADER_MODEL_DATA));
+		}
 
 		// Adjust CPU data to reflect what we want to draw
 			//GW::MATH::GMatrix::RotateYLocalF(modelData.matricies[1],

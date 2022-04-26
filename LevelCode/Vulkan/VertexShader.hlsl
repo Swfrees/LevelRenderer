@@ -35,9 +35,20 @@ struct OBJ_VERT
 struct SHADER_MODEL_DATA
 {
 	//globally shared model data
-    float4 sundirection, sunColor; //lighting info
+    
+    int DirectionalLightCount, PointLightCount;
+    int padding[2];
+    
+    float4 DirectionalLightDirection[MAX_SUBMESH_PER_DRAW];
+    float4 DirectionalLightColor[MAX_SUBMESH_PER_DRAW]; //lighting info
+    
+    float4 PointLightPosition[MAX_SUBMESH_PER_DRAW];
+    float4 PointLightColor[MAX_SUBMESH_PER_DRAW];
+    float PointLightFalloffs[MAX_SUBMESH_PER_DRAW];
+    
     float4 camEye, sunAmbient;
     float4x4 viewMatrix, projectionMatrix; //viewing info
+    
 	//per sub-mesh transform and material data
     float4x4 matricies[MAX_SUBMESH_PER_DRAW];
     OBJ_ATTRIBUTES materials[MAX_SUBMESH_PER_DRAW];

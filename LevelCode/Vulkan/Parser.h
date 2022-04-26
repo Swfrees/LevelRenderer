@@ -69,7 +69,18 @@ struct Level
 struct SHADER_MODEL_DATA
 {
 	//globally shared model data
-	GW::MATH::GVECTORF sundirection, sunColor; //lighting info
+	//GW::MATH::GVECTORF sundirection, sunColor; //lighting info
+	int DirectionalLightCount, PointLightCount;
+
+	int padding[2];
+
+	GW::MATH::GVECTORF DirectionalLightDirection[MAX_SUBMESH_PER_DRAW];
+	GW::MATH::GVECTORF DirectionalLightColor[MAX_SUBMESH_PER_DRAW];
+
+	GW::MATH::GVECTORF PointLightPosition[MAX_SUBMESH_PER_DRAW];
+	GW::MATH::GVECTORF PointLightColor[MAX_SUBMESH_PER_DRAW];
+	float PointLightFalloffs[MAX_SUBMESH_PER_DRAW];
+
 	GW::MATH::GVECTORF camEye, sunAmbient;
 	GW::MATH::GMATRIXF viewMatrix, projectionMatrix; //viewing info
 	//per sub-mesh transform and material data
