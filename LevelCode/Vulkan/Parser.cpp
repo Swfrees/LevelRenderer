@@ -176,26 +176,26 @@ void LoadLevel(Level &InputLevel, VkDevice& device, VkPhysicalDevice& physicalDe
 			GvkHelper::write_to_buffer(device, InputLevel.LevelModels[CurrentIndex].ModelIndexMemory, InputLevel.LevelModels[CurrentIndex].ModelIndices.data(), sizeof(unsigned int) * InputLevel.LevelModels[CurrentIndex].ModelIndices.size());
 		}
 
-		/*else if (InputLevel.LevelObjects[i].ObjectType == LIGHT)
+		else if (InputLevel.LevelObjects[i].ObjectType == LIGHT)
 		{
 			Light TempLight = {};
 			TempLight.LightColor = InputLevel.LevelObjects[i].ObjectWorldMatrix.row2;
 
 			if (InputLevel.LevelObjects[i].ObjectName == "Point")
 			{
-				TempLight.LightType = POINT;
+				TempLight.LightType = PLIGHT;
 				TempLight.LightPosition = InputLevel.LevelObjects[i].ObjectWorldMatrix.row4;
 				TempLight.Falloff = InputLevel.LevelObjects[i].ObjectWorldMatrix.row1.x;
 			}
 
 			else
 			{
-				TempLight.LightType = DIRECTIONAL;
+				TempLight.LightType = DLIGHT;
 				TempLight.LightDirection = InputLevel.LevelObjects[i].ObjectWorldMatrix.row1;
 			}
 
 			InputLevel.LevelLights.push_back(TempLight);
-		}*/
+		}
 
 	}
 }

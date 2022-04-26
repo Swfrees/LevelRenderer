@@ -16,11 +16,11 @@ enum ObjectType
 	LIGHT
 };
 
-//enum LightType
-//{
-//	POINT,
-//	DIRECTIONAL
-//};
+enum LightType
+{
+	PLIGHT,
+	DLIGHT
+};
 
 struct Model
 {
@@ -44,8 +44,7 @@ struct Model
 
 struct Light
 {
-	//LightType LightType;
-
+	LightType LightType;
 	GW::MATH::GVECTORF LightPosition;
 	GW::MATH::GVECTORF LightDirection;
 	GW::MATH::GVECTORF LightColor;
@@ -65,10 +64,6 @@ struct Level
 	std::vector <LevelObject> LevelObjects;
 	std::vector<Model> LevelModels;
 	std::vector<Light> LevelLights;
-
-	//add bool for renderingflag
-	//std::vector<DirectionLight> DirectionalLights;
-	//std::vector<PointLight> PointLights;
 };
 
 struct SHADER_MODEL_DATA
