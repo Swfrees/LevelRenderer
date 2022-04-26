@@ -16,3 +16,6 @@ Up on right stick is to rotate camera up
 Down on left stick is to rotate camera down
 Left on right stick to rotate right
 Right on right stick to rotate left
+
+Level Swapping:
+Press F1 to swap levels
