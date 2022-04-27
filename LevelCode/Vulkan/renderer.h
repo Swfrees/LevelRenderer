@@ -35,6 +35,9 @@ std::string ShaderAsString(const char* shaderFilePath) {
 		std::cout << "ERROR: Shader Source File \"" << shaderFilePath << "\" Not Found!" << std::endl;
 	return output;
 }
+
+extern VkClearValue clrAndDepth[2];
+
 // Creation, Rendering & Cleanup
 class Renderer
 {
@@ -552,15 +555,29 @@ public:
 
 	}
 
-
+	std::vector<VkClearColorValue> SkyColor = { {0.125f, 0.066f, 0.078f, 1}, {0.019f, 0.007f, 0.070f, 1} };
+	int ColorIndex = 0;
 
 	void LevelSwap(Level &InputLevel, VkDevice& device, VkPhysicalDevice& physicalDevice)
 	{
+		ColorIndex++;
+		if (ColorIndex > 1)
+		{
+			ColorIndex = 0;
+		}
+		clrAndDepth[0].color = SkyColor[ColorIndex];
 		LevelCleanup(InputLevel, device);
 		std::cout << "Loading First Level" << "\n";
 		InputLevel = ParseLevel(LevelVector[LevelNumber]);
 		LoadLevel(InputLevel, device, physicalDevice);
 		SetupModelData(InputLevel, modelData);
+		for (size_t i = 0; i < LevelObject.LevelLights.size(); i++)
+		{
+			modelData.PointLightColor[i] = LevelObject.LevelLights[i].LightColor;
+			modelData.PointLightPosition[i] = LevelObject.LevelLights[i].LightPosition;
+			modelData.PointLightFalloffs[i] = LevelObject.LevelLights[i].Falloff;
+			modelData.PointLightCount += 1;
+		}
 	}
 
 	XTime timer = XTime();

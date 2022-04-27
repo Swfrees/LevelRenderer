@@ -21,6 +21,7 @@ using namespace CORE;
 using namespace SYSTEM;
 using namespace GRAPHICS;
 // lets pop a window and use Vulkan to clear to a red screen
+VkClearValue clrAndDepth[2];
 int main()
 {
 	GWindow win;
@@ -31,15 +32,14 @@ int main()
 	{
 		// TODO: Part 1a
 		win.SetWindowName("Spencer Frees - Level Renderer - Vulkan");
-		VkClearValue clrAndDepth[2];
 		//clrAndDepth[0].color = { {0.25f, 0.0f, 1.0f, 1} };
-		clrAndDepth[0].color = { {0.5f, 0.50f, 0.5f, 1} };
+		clrAndDepth[0].color = { { 0.125f, 0.066f, 0.078f, 1 } };
 		clrAndDepth[1].depthStencil = { 1.0f, 0u };
-		msgs.Create([&](const GW::GEvent& e) {
-			GW::SYSTEM::GWindow::Events q;
-			if (+e.Read(q) && q == GWindow::Events::RESIZE)
-				clrAndDepth[0].color.float32[2] += 0.01f; // disable
-			});
+		//msgs.Create([&](const GW::GEvent& e) {
+		//	GW::SYSTEM::GWindow::Events q;
+		//	if (+e.Read(q) && q == GWindow::Events::RESIZE)
+		//		clrAndDepth[0].color.float32[2] += 0.01f; // disable
+		//	});
 		win.Register(msgs);
 #ifndef NDEBUG
 		const char* debugLayers[] = {
