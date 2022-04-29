@@ -67,6 +67,9 @@ class Renderer
 	VkPipeline pipeline = nullptr;
 	VkPipelineLayout pipelineLayout = nullptr;
 
+	VkPipeline BoundingBoxesPipeline = nullptr;
+	VkPipelineLayout BoundingBoxesPipelineLayout = nullptr;
+
 	VkDescriptorSetLayout descriptorLayout = nullptr;
 	VkDescriptorPool descriptorPool = nullptr;
 
@@ -460,6 +463,11 @@ public:
 		vkCreateGraphicsPipelines(device, VK_NULL_HANDLE, 1, 
 			&pipeline_create_info, nullptr, &pipeline);
 
+		assembly_create_info.topology = VK_PRIMITIVE_TOPOLOGY_LINE_LIST;
+
+		vkCreateGraphicsPipelines(device, VK_NULL_HANDLE, 1,
+			&pipeline_create_info, nullptr, &BoundingBoxesPipeline);
+
 		/***************** CLEANUP / SHUTDOWN ******************/
 		// GVulkanSurface will inform us when to release any allocated resources
 		shutdown.Create(vlk, [&]() {
@@ -567,7 +575,7 @@ public:
 		}
 		clrAndDepth[0].color = SkyColor[ColorIndex];
 		LevelCleanup(InputLevel, device);
-		std::cout << "Loading First Level" << "\n";
+		std::cout << "Loading" << LevelVector[LevelNumber] << "Level" << "\n";
 		InputLevel = ParseLevel(LevelVector[LevelNumber]);
 		LoadLevel(InputLevel, device, physicalDevice);
 		SetupModelData(InputLevel, modelData);
@@ -601,6 +609,8 @@ public:
 
 		if (GetAsyncKeyState('R') & 0x1)
 		{
+			std::cout << "Reset Camera Position" << "\n";
+
 			mathOperator.LookAtLHF(Eye, Look, Up, viewMatrix);
 
 			modelData.viewMatrix = viewMatrix;
@@ -609,6 +619,37 @@ public:
 			vlk.GetSwapchainCurrentImage(currentBuffer);
 			GvkHelper::write_to_buffer(device,
 				storageData[currentBuffer], &modelData, sizeof(SHADER_MODEL_DATA));
+		}
+
+		if (GetAsyncKeyState('T') & 0x1)
+		{
+
+			LevelObject.TriangulateFlag = !LevelObject.TriangulateFlag;
+
+			if(LevelObject.TriangulateFlag == true)
+			{
+				std::cout << "Toggled Triangulation On" << "\n";
+			}
+			else if(LevelObject.TriangulateFlag == false)
+			{
+				std::cout << "Toggled Triangulation Off" << "\n";
+			}
+
+		}
+
+		if (GetAsyncKeyState('B') & 0x1)
+		{
+			LevelObject.BoundingBoxFlag = !LevelObject.BoundingBoxFlag;
+
+			if (LevelObject.BoundingBoxFlag == true)
+			{
+				std::cout << "Toggled Bounding Boxes On" << "\n";
+			}
+			else if (LevelObject.BoundingBoxFlag == false)
+			{
+				std::cout << "Toggled Bounding Boxes Off" << "\n";
+			}
+
 		}
 
 		// Adjust CPU data to reflect what we want to draw
@@ -640,7 +681,21 @@ public:
         VkRect2D scissor = { {0, 0}, {width, height} };
 		vkCmdSetViewport(commandBuffer, 0, 1, &viewport);
 		vkCmdSetScissor(commandBuffer, 0, 1, &scissor);
-		vkCmdBindPipeline(commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, pipeline);
+		
+		if (LevelObject.TriangulateFlag)
+		{
+			vkCmdBindPipeline(commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, BoundingBoxesPipeline);
+		}
+		else if (LevelObject.BoundingBoxFlag)
+		{
+			vkCmdBindPipeline(commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, BoundingBoxesPipeline);
+		}
+		else
+		{
+			vkCmdBindPipeline(commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, pipeline);
+			
+		}
+		
 		
 		/*for (size_t i = 0; i < descriptorSet.size(); i++)
 		{

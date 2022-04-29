@@ -40,6 +40,13 @@ struct Model
 
 	std::vector<int> SubmeshMaterials;
 
+	VkBuffer BoundingBoxesVertexBuffer;
+	VkBuffer BoundingBoxesIndexBuffer;
+	VkDeviceMemory BoundingBoxesVertexMemory;
+	VkDeviceMemory BoundingBoxesIndexMemory;
+
+	std::vector<H2B::VERTEX> BoundingBoxesVertices;
+	GW::MATH::GVECTORF BoundingBoxesBounds;
 };
 
 struct Light
@@ -56,6 +63,9 @@ struct LevelObject
 	ObjectType ObjectType;
 	std::string ObjectName;
 	GW::MATH::GMATRIXF ObjectWorldMatrix;
+
+	std::vector<H2B::VERTEX> BoundingBoxesVertices;
+	GW::MATH::GVECTORF BoundingBoxesBounds;
 };
 
 struct Level
@@ -64,6 +74,8 @@ struct Level
 	std::vector <LevelObject> LevelObjects;
 	std::vector<Model> LevelModels;
 	std::vector<Light> LevelLights;
+	bool BoundingBoxFlag;
+	bool TriangulateFlag;
 };
 
 struct SHADER_MODEL_DATA
@@ -88,6 +100,7 @@ struct SHADER_MODEL_DATA
 	H2B::ATTRIBUTES materials[MAX_SUBMESH_PER_DRAW];
 };
 
+void GenerateBoundingBoxes(Level& InputLevel, GW::MATH::GVECTORF Bounds);
 Level ParseLevel(std::string LevelName);
 void LoadLevel(Level& InputLevel, VkDevice& device, VkPhysicalDevice& physicalDevice);
 void SetupModelData(Level &InputLevel, SHADER_MODEL_DATA &modelData);

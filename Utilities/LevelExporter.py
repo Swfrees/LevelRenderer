@@ -37,10 +37,10 @@ def print_heir(ob, levels=10):
         # { px, py, pz, 1 }    { px, pz, py, 1 }  
         row_world = ob.matrix_world.transposed()
         converted = mathutils.Matrix.Identity(4)
-        converted[0][0:3] = row_world[0][0], row_world[0][2], row_world[0][1]
-        converted[1][0:3] = row_world[1][0], row_world[1][2], row_world[1][1] 
-        converted[2][0:3] = row_world[2][0], row_world[2][2], row_world[2][1] 
-        converted[3][0:3] = row_world[3][0], row_world[3][2], row_world[3][1]  
+        converted[0][0:4] = row_world[0][0], row_world[0][2], row_world[0][1], ob.dimensions[0] * ob.scale[0]
+        converted[1][0:4] = row_world[1][0], row_world[1][2], row_world[1][1], ob.dimensions[1] * ob.scale[1]
+        converted[2][0:4] = row_world[2][0], row_world[2][2], row_world[2][1], ob.dimensions[2] * ob.scale[2]
+        converted[3][0:3] = row_world[3][0], row_world[3][2], row_world[3][1] 
         
         if 'Point' in ob.name:
             converted[0][0] = ob.data.cutoff_distance

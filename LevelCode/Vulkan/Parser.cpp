@@ -11,6 +11,69 @@
 #include <vulkan/vulkan_core.h>
 using namespace H2B;
 
+std::vector<unsigned int> BoundingBoxesIndices = {
+	0, 1,
+	2, 0,
+	2, 3,
+	1, 3,
+	3, 7,
+	7, 5,
+	4, 5,
+	5, 1,
+	4, 0,
+	4, 6,
+	6, 7,
+	6, 2
+};
+
+void GenerateBoundingBoxes(std::vector<H2B::VERTEX> &InputVertices, GW::MATH::GVECTORF Bounds)
+{
+	std::vector<H2B::VERTEX> ReturnVertices;
+	H2B::VERTEX TempVertex;
+
+	TempVertex.pos.x = Bounds.x;
+	TempVertex.pos.y = -Bounds.y + Bounds.y;
+	TempVertex.pos.z = Bounds.z;
+	ReturnVertices.push_back(TempVertex);
+
+	TempVertex.pos.x = Bounds.x;
+	TempVertex.pos.y = -Bounds.y + Bounds.y;
+	TempVertex.pos.z = -Bounds.z;
+	ReturnVertices.push_back(TempVertex);
+
+	TempVertex.pos.x = -Bounds.x;
+	TempVertex.pos.y = -Bounds.y + Bounds.y;
+	TempVertex.pos.z = Bounds.z;
+	ReturnVertices.push_back(TempVertex);
+
+	TempVertex.pos.x = -Bounds.x;
+	TempVertex.pos.y = -Bounds.y + Bounds.y;
+	TempVertex.pos.z = -Bounds.z;
+	ReturnVertices.push_back(TempVertex);
+
+	TempVertex.pos.x = Bounds.x;
+	TempVertex.pos.y = Bounds.y + Bounds.y;
+	TempVertex.pos.z = Bounds.z;
+	ReturnVertices.push_back(TempVertex);
+
+	TempVertex.pos.x = Bounds.x;
+	TempVertex.pos.y = Bounds.y + Bounds.y;
+	TempVertex.pos.z = -Bounds.z;
+	ReturnVertices.push_back(TempVertex);
+
+	TempVertex.pos.x = -Bounds.x;
+	TempVertex.pos.y = Bounds.y + Bounds.y;
+	TempVertex.pos.z = Bounds.z;
+	ReturnVertices.push_back(TempVertex);
+
+	TempVertex.pos.x = -Bounds.x;
+	TempVertex.pos.y = Bounds.y + Bounds.y;
+	TempVertex.pos.z = -Bounds.z;
+	ReturnVertices.push_back(TempVertex);
+
+	InputVertices = ReturnVertices;
+}
+
 Level ParseLevel(std::string LevelName)
 {
 	Level ReturnLevel = {};
@@ -95,6 +158,13 @@ Level ParseLevel(std::string LevelName)
 				}
 			}
 
+			TempObject.BoundingBoxesBounds.x = TempMatrix.row1.w / 2;
+			TempObject.BoundingBoxesBounds.y = TempMatrix.row2.w / 2;
+			TempObject.BoundingBoxesBounds.z = TempMatrix.row3.w / 2;
+			TempMatrix.row1.w = 0;
+			TempMatrix.row2.w = 0;
+			TempMatrix.row3.w = 0;
+			GenerateBoundingBoxes(TempObject.BoundingBoxesVertices, TempObject.BoundingBoxesBounds);
 			TempObject.ObjectWorldMatrix = TempMatrix;
 			ReturnLevel.LevelObjects.push_back(TempObject);
 		}
@@ -124,6 +194,8 @@ Level ParseLevel(std::string LevelName)
 	}
 
 	std::cout << "-----------------------------------------\n\n";
+
+
 
 	return ReturnLevel;
 }
@@ -161,6 +233,9 @@ void LoadLevel(Level &InputLevel, VkDevice& device, VkPhysicalDevice& physicalDe
 			TempModel.ModelName = TempString;
 			TempModel.ModelWorldMatrix = InputLevel.LevelObjects[i].ObjectWorldMatrix;
 
+			TempModel.BoundingBoxesVertices = InputLevel.LevelObjects[i].BoundingBoxesVertices;
+			TempModel.BoundingBoxesBounds = InputLevel.LevelObjects[i].BoundingBoxesBounds;
+
 			H2BLoad(TempString, TempModel.ModelVertices, TempModel.ModelIndices, TempModel.ModelSubmeshes, TempModel.ModelMaterials);
 
 			InputLevel.LevelModels.push_back(TempModel);
@@ -169,11 +244,22 @@ void LoadLevel(Level &InputLevel, VkDevice& device, VkPhysicalDevice& physicalDe
 			GvkHelper::create_buffer(physicalDevice, device, sizeof(VERTEX) * InputLevel.LevelModels[CurrentIndex].ModelVertices.size(),
 				VK_BUFFER_USAGE_VERTEX_BUFFER_BIT, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT |
 				VK_MEMORY_PROPERTY_HOST_COHERENT_BIT, &InputLevel.LevelModels[CurrentIndex].ModelVertexBuffer, &InputLevel.LevelModels[CurrentIndex].ModelVertexMemory);
-			GvkHelper::write_to_buffer(device, InputLevel.LevelModels[CurrentIndex].ModelVertexMemory, InputLevel.LevelModels[CurrentIndex].ModelVertices.data() , sizeof(VERTEX) * InputLevel.LevelModels[CurrentIndex].ModelVertices.size());
+			GvkHelper::write_to_buffer(device, InputLevel.LevelModels[CurrentIndex].ModelVertexMemory, InputLevel.LevelModels[CurrentIndex].ModelVertices.data(), sizeof(VERTEX) * InputLevel.LevelModels[CurrentIndex].ModelVertices.size());
+			
 			GvkHelper::create_buffer(physicalDevice, device, sizeof(unsigned int) * InputLevel.LevelModels[CurrentIndex].ModelIndices.size(),
 				VK_BUFFER_USAGE_INDEX_BUFFER_BIT, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT |
 				VK_MEMORY_PROPERTY_HOST_COHERENT_BIT, &InputLevel.LevelModels[CurrentIndex].ModelIndexBuffer, &InputLevel.LevelModels[CurrentIndex].ModelIndexMemory);
 			GvkHelper::write_to_buffer(device, InputLevel.LevelModels[CurrentIndex].ModelIndexMemory, InputLevel.LevelModels[CurrentIndex].ModelIndices.data(), sizeof(unsigned int) * InputLevel.LevelModels[CurrentIndex].ModelIndices.size());
+
+			GvkHelper::create_buffer(physicalDevice, device, sizeof(VERTEX) * InputLevel.LevelModels[CurrentIndex].BoundingBoxesVertices.size(),
+				VK_BUFFER_USAGE_VERTEX_BUFFER_BIT, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT |
+				VK_MEMORY_PROPERTY_HOST_COHERENT_BIT, &InputLevel.LevelModels[CurrentIndex].BoundingBoxesVertexBuffer, &InputLevel.LevelModels[CurrentIndex].BoundingBoxesVertexMemory);
+			GvkHelper::write_to_buffer(device, InputLevel.LevelModels[CurrentIndex].BoundingBoxesVertexMemory, InputLevel.LevelModels[CurrentIndex].BoundingBoxesVertices.data() , sizeof(VERTEX) * InputLevel.LevelModels[CurrentIndex].BoundingBoxesVertices.size());
+			
+			GvkHelper::create_buffer(physicalDevice, device, sizeof(unsigned int) * BoundingBoxesIndices.size(),
+				VK_BUFFER_USAGE_INDEX_BUFFER_BIT, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT |
+				VK_MEMORY_PROPERTY_HOST_COHERENT_BIT, &InputLevel.LevelModels[CurrentIndex].BoundingBoxesIndexBuffer, &InputLevel.LevelModels[CurrentIndex].BoundingBoxesIndexMemory);
+			GvkHelper::write_to_buffer(device, InputLevel.LevelModels[CurrentIndex].BoundingBoxesIndexMemory, BoundingBoxesIndices.data(), sizeof(unsigned int) * BoundingBoxesIndices.size());
 		}
 
 		else if (InputLevel.LevelObjects[i].ObjectType == LIGHT)
@@ -219,6 +305,10 @@ struct UINT2
 	unsigned int y;
 };
 
+
+
+
+
 void RenderModels(Level InputLevel, std::vector<VkDescriptorSet> descriptorSet, VkCommandBuffer &commandBuffer, VkPipelineLayout &pipelineLayout, VkDeviceSize *offsets)
 {
 
@@ -226,6 +316,12 @@ void RenderModels(Level InputLevel, std::vector<VkDescriptorSet> descriptorSet, 
 
 	for (size_t i = 0; i < InputLevel.LevelModels.size(); i++)
 	{
+
+		//if (InputLevel.TriangulateFlag == true)
+		//{
+		//	vkCmdBindVertexBuffers(commandBuffer, 0, 1, &InputLevel.LevelModels[i].BoundingBoxesVertexBuffer, offsets);
+		//	vkCmdBindIndexBuffer(commandBuffer, InputLevel.LevelModels[i].BoundingBoxesIndexBuffer, *offsets, VK_INDEX_TYPE_UINT32);
+		//}
 
 		vkCmdBindVertexBuffers(commandBuffer, 0, 1, &InputLevel.LevelModels[i].ModelVertexBuffer, offsets);
 		vkCmdBindIndexBuffer(commandBuffer, InputLevel.LevelModels[i].ModelIndexBuffer, *offsets, VK_INDEX_TYPE_UINT32);
@@ -239,11 +335,19 @@ void RenderModels(Level InputLevel, std::vector<VkDescriptorSet> descriptorSet, 
 
 		for (size_t j = 0; j < InputLevel.LevelModels[i].ModelSubmeshes.size(); j++, m++)
 		{
+
 			UINT2 PushInts = {};
 			PushInts.x = i;
 			PushInts.y = m /*InputLevel.LevelModels[i].SubmeshMaterials[i + j]*/;
 			vkCmdPushConstants(commandBuffer, pipelineLayout, (VK_SHADER_STAGE_VERTEX_BIT | VK_SHADER_STAGE_FRAGMENT_BIT), *offsets, sizeof(unsigned int) * 2, &PushInts);
 			vkCmdDrawIndexed(commandBuffer, InputLevel.LevelModels[i].ModelSubmeshes[j].indexCount, 1, InputLevel.LevelModels[i].ModelSubmeshes[j].indexOffset, *offsets, 0);
+		}
+
+		if (InputLevel.BoundingBoxFlag == true)
+		{
+			vkCmdBindVertexBuffers(commandBuffer, 0, 1, &InputLevel.LevelModels[i].BoundingBoxesVertexBuffer, offsets);
+			vkCmdBindIndexBuffer(commandBuffer, InputLevel.LevelModels[i].BoundingBoxesIndexBuffer, *offsets, VK_INDEX_TYPE_UINT32);
+			vkCmdDrawIndexed(commandBuffer, BoundingBoxesIndices.size(), 1, 0, *offsets, 0);
 		}
 	}
 }
@@ -257,6 +361,11 @@ void LevelCleanup(Level &InputLevel, VkDevice &device)
 		vkFreeMemory(device, InputLevel.LevelModels[i].ModelVertexMemory, nullptr);
 		vkDestroyBuffer(device, InputLevel.LevelModels[i].ModelIndexBuffer, nullptr);
 		vkFreeMemory(device, InputLevel.LevelModels[i].ModelIndexMemory, nullptr);
+
+		vkDestroyBuffer(device, InputLevel.LevelModels[i].BoundingBoxesVertexBuffer, nullptr);
+		vkFreeMemory(device, InputLevel.LevelModels[i].BoundingBoxesVertexMemory, nullptr);
+		vkDestroyBuffer(device, InputLevel.LevelModels[i].BoundingBoxesIndexBuffer, nullptr);
+		vkFreeMemory(device, InputLevel.LevelModels[i].BoundingBoxesIndexMemory, nullptr);
 	}
 
 }
